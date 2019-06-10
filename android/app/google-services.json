@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "143288890047",
+    "firebase_url": "https://yagnyam-sms-gateway.firebaseio.com",
+    "project_id": "yagnyam-sms-gateway",
+    "storage_bucket": "yagnyam-sms-gateway.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:143288890047:android:0ba498b5a4af1e11",
+        "android_client_info": {
+          "package_name": "in.yagnyam.sms_gateway"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "143288890047-44fc6gvcv03t0pmr9g77jr0lpov8er6f.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD_wuI_GHDXP9LoCRaoI7kBehnLyJ8CJX0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "143288890047-44fc6gvcv03t0pmr9g77jr0lpov8er6f.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

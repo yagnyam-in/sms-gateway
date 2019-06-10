@@ -1,0 +1,28 @@
+name: sms_gateway
+description: SMS gateway using personal Mobile
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.2.2 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  json_annotation: ^2.4.0
+  shared_preferences: ^0.5.2+1
+  firebase_auth: ^0.11.1+6
+  firebase_messaging: ^5.0.1+1
+  cloud_firestore: ^0.12.1
+  permission_handler: '^3.1.0'
+
+  cupertino_icons: ^0.1.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
