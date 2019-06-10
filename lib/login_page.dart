@@ -115,6 +115,9 @@ class _LoginPageState extends State<LoginPage> with SmsHelper {
   }
 
   void _login() {
+    if (!_formKey.currentState.validate()) {
+      return null;
+    }
     if (_authCredential == null) {
       showToast("Not yet ready");
     }

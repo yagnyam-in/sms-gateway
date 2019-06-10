@@ -1,19 +1,27 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sms_gateway/manage_apps_page.dart';
 import 'package:sms_gateway/notification_service.dart';
 import 'package:sms_gateway/sms_helper.dart';
 import 'package:sms_gateway/test_page.dart';
 
 class HomePage extends StatefulWidget {
-  HomePage({Key key}) : super(key: key);
+  final FirebaseUser firebaseUser;
+
+  HomePage(this.firebaseUser, {Key key}) : super(key: key);
 
   @override
-  _HomePageState createState() => _HomePageState();
+  _HomePageState createState() => _HomePageState(firebaseUser);
 }
 
 class _HomePageState extends State<HomePage> with SmsHelper {
+  final FirebaseUser firebaseUser;
+
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   int _counter = 0;
+
+  _HomePageState(this.firebaseUser);
 
   @override
   void initState() {
@@ -36,7 +44,7 @@ class _HomePageState extends State<HomePage> with SmsHelper {
         title: Text("SMS Gateway"),
         actions: <Widget>[
           IconButton(
-            icon: Icon(Icons.account_balance),
+            icon: Icon(Icons.apps),
             tooltip: "Apps",
             onPressed: () => _manageApps(context),
           ),
@@ -75,6 +83,11 @@ class _HomePageState extends State<HomePage> with SmsHelper {
   }
 
   void _manageApps(BuildContext context) {
-
+    Navigator.push(
+      context,
+      new MaterialPageRoute(
+        builder: (context) => ManageAppsPage(firebaseUser),
+      ),
+    );
   }
 }

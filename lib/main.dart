@@ -49,7 +49,7 @@ class _MyAppState extends State<MyApp> {
     } else if (!snapshot.hasData) {
       return LoginPage(callback: _onLogin,);
     } else {
-      return HomePage();
+      return HomePage(snapshot.data);
     }
   }
 

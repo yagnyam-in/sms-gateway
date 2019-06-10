@@ -100,6 +100,9 @@ class _TestPageState extends State<TestPage> with SmsHelper {
   }
 
   Future<void> _submit() async {
+    if (!_formKey.currentState.validate()) {
+      return null;
+    }
     String phone = phoneController.text;
     String message = messageController.text;
     sharedPreferences.setString(TEST_PHONE_KEY, phone);
