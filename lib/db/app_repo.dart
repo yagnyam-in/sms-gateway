@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:async' as prefix0;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -24,17 +25,40 @@ class AppRepo with FirestoreUtils {
   }
 
   Future<AppEntity> fetchApp(String appId) async {
-    var snapshot = await _appsRef.where("id", isEqualTo: appId).getDocuments();
-    List<AppEntity> apps = _querySnapshotToApps(snapshot);
-    if (apps.isEmpty) {
-      return null;
+    var document = await ref(appId).get();
+    if (document.exists) {
+      return AppEntity.fromJson(document.data);
     } else {
-      return apps.first;
+      return null;
     }
   }
 
+  Future<bool> isAppIdTaken(String appId) async {
+    var doc = await Firestore.instance.collection('apps').document(appId).get();
+    return doc.exists;
+  }
+
+  Future<String> appIdOwnerId(String appId) async {
+    var doc = await Firestore.instance.collection('apps').document(appId).get();
+    if (!doc.exists) {
+      return null;
+    } else {
+      return doc.data["userId"];
+    }
+  }
+
+
   Future<AppEntity> save(AppEntity app) async {
-    await ref(app.uid).setData(app.toJson(), merge: true);
+    String existingAppIdOwner = await appIdOwnerId(app.id);
+    if (existingAppIdOwner == null) {
+      await Firestore.instance.collection('apps').document(app.id).setData({
+        'userId': app.userId,
+      });
+    } else if (existingAppIdOwner != app.userId) {
+      throw "App id ${app.id} is already taken";
+    }
+
+    await ref(app.id).setData(app.toJson(), merge: true);
     return app;
   }
 

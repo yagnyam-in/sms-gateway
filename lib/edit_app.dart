@@ -1,9 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:sms_gateway/model/app_entity.dart';
 import 'package:sms_gateway/db/app_repo.dart';
+import 'package:sms_gateway/model/app_entity.dart';
 import 'package:sms_gateway/sms_helper.dart';
-import 'package:uuid/uuid.dart';
 
 class EditApp extends StatefulWidget {
   final FirebaseUser firebaseUser;
@@ -64,6 +63,7 @@ class _EditAppState extends State<EditApp> with SmsHelper {
                 decoration: InputDecoration(
                   labelText: "Id",
                 ),
+                enabled: app == null,
                 validator: (value) => _appIdFieldValidator(value),
               ),
               const SizedBox(height: 8.0),
@@ -114,7 +114,7 @@ class _EditAppState extends State<EditApp> with SmsHelper {
     if (error != null) {
       return error;
     }
-    if (!AppEntity.ID_REGEX.hasMatch(value)) {
+    if (!AppEntity.idRegex.hasMatch(value)) {
       return "Only alphabets and hyphens are allowed";
     }
     return null;
@@ -141,8 +141,13 @@ class _EditAppState extends State<EditApp> with SmsHelper {
     }
     AppEntity effectiveApp = app;
     if (effectiveApp == null) {
+      bool duplicateAppId = await AppRepo(firebaseUser).isAppIdTaken(idController.text);
+      if (duplicateAppId) {
+        showToast("App Id already taken");
+        return null;
+      }
       effectiveApp = AppEntity(
-        uid: Uuid().v4(),
+        userId: firebaseUser.uid,
         id: idController.text,
         name: nameController.text,
         description: descriptionController.text,
@@ -150,13 +155,17 @@ class _EditAppState extends State<EditApp> with SmsHelper {
       );
     } else {
       effectiveApp = app.copy(
-        id: idController.text,
         name: nameController.text,
         description: descriptionController.text,
         accessToken: accessTokenController.text,
       );
     }
-    effectiveApp = await AppRepo(firebaseUser).save(effectiveApp);
-    Navigator.of(context).pop(effectiveApp);
+    try {
+      effectiveApp = await AppRepo(firebaseUser).save(effectiveApp);
+      Navigator.of(context).pop(effectiveApp);
+    } catch (e) {
+      print("Error Saving App: $e");
+      showToast("$e");
+    }
   }
 }

@@ -8,7 +8,7 @@ part of 'app_entity.dart';
 
 AppEntity _$AppEntityFromJson(Map json) {
   return AppEntity(
-      uid: json['uid'] as String,
+      userId: json['userId'] as String,
       id: json['id'] as String,
       name: json['name'] as String,
       description: json['description'] as String,
@@ -18,10 +18,9 @@ AppEntity _$AppEntityFromJson(Map json) {
 
 Map<String, dynamic> _$AppEntityToJson(AppEntity instance) {
   final val = <String, dynamic>{
-    'uid': instance.uid,
+    'userId': instance.userId,
     'id': instance.id,
     'name': instance.name,
-    'description': instance.description,
   };
 
   void writeNotNull(String key, dynamic value) {
@@ -30,6 +29,7 @@ Map<String, dynamic> _$AppEntityToJson(AppEntity instance) {
     }
   }
 
+  writeNotNull('description', instance.description);
   writeNotNull('accessToken', instance.accessToken);
   writeNotNull('smsCount', instance.smsCount);
   return val;

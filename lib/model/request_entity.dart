@@ -6,7 +6,7 @@ part 'request_entity.g.dart';
 
 @JsonSerializable()
 class RequestEntity {
-  @JsonKey(nullable: false)
+  @JsonKey(nullable: true)
   final String uid;
   @JsonKey(nullable: false)
   final String appId;

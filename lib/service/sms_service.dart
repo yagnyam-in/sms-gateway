@@ -4,7 +4,6 @@ import 'package:sms_gateway/db/app_repo.dart';
 import 'package:sms_gateway/db/request_repo.dart';
 import 'package:sms_gateway/model/app_entity.dart';
 import 'package:sms_gateway/model/request_entity.dart';
-import 'package:uuid/uuid.dart';
 
 class SmsService {
   static const platform =
@@ -64,7 +63,7 @@ class SmsService {
       AppEntity app = await appRepo.fetchApp(request.appId);
       if (app == null) {
         app = AppEntity(
-          uid: Uuid().v4(),
+          userId: firebaseUser.uid,
           id: request.appId,
           name: request.appId,
           description: 'Not yet registered',

@@ -43,10 +43,22 @@ class RequestRepo with FirestoreUtils {
   List<RequestEntity> _querySnapshotToRequests(QuerySnapshot snapshot) {
     if (snapshot.documents != null) {
       return snapshot.documents
-          .map((s) => RequestEntity.fromJson(s.data))
+          .map(_documentSnapshotToRequest)
           .toList();
     } else {
       return [];
+    }
+  }
+
+  RequestEntity _documentSnapshotToRequest(DocumentSnapshot snapshot) {
+    if (!snapshot.exists) {
+      return null;
+    } else {
+      Map map = {
+        ...snapshot.data,
+        'uid': snapshot.documentID,
+      };
+      return RequestEntity.fromJson(map);
     }
   }
 }

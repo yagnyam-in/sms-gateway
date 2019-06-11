@@ -28,9 +28,6 @@ class UserEntity {
   static UserEntity fromJson(Map json) => _$UserEntityFromJson(json);
 
   UserEntity copy({
-    String id,
-    String name,
-    String description,
     String fcmToken,
   }) =>
       UserEntity(

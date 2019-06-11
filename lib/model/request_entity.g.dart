@@ -14,10 +14,18 @@ RequestEntity _$RequestEntityFromJson(Map json) {
       message: json['message'] as String);
 }
 
-Map<String, dynamic> _$RequestEntityToJson(RequestEntity instance) =>
-    <String, dynamic>{
-      'uid': instance.uid,
-      'appId': instance.appId,
-      'phone': instance.phone,
-      'message': instance.message
-    };
+Map<String, dynamic> _$RequestEntityToJson(RequestEntity instance) {
+  final val = <String, dynamic>{};
+
+  void writeNotNull(String key, dynamic value) {
+    if (value != null) {
+      val[key] = value;
+    }
+  }
+
+  writeNotNull('uid', instance.uid);
+  val['appId'] = instance.appId;
+  val['phone'] = instance.phone;
+  val['message'] = instance.message;
+  return val;
+}
