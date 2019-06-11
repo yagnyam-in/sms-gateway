@@ -8,6 +8,7 @@ part of 'app_entity.dart';
 
 AppEntity _$AppEntityFromJson(Map json) {
   return AppEntity(
+      uid: json['uid'] as String,
       id: json['id'] as String,
       name: json['name'] as String,
       description: json['description'] as String,
@@ -15,7 +16,12 @@ AppEntity _$AppEntityFromJson(Map json) {
 }
 
 Map<String, dynamic> _$AppEntityToJson(AppEntity instance) {
-  final val = <String, dynamic>{};
+  final val = <String, dynamic>{
+    'uid': instance.uid,
+    'id': instance.id,
+    'name': instance.name,
+    'description': instance.description,
+  };
 
   void writeNotNull(String key, dynamic value) {
     if (value != null) {
@@ -23,9 +29,6 @@ Map<String, dynamic> _$AppEntityToJson(AppEntity instance) {
     }
   }
 
-  writeNotNull('id', instance.id);
-  val['name'] = instance.name;
-  val['description'] = instance.description;
   writeNotNull('accessToken', instance.accessToken);
   return val;
 }

@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:sms_gateway/app_entity.dart';
-import 'package:sms_gateway/app_repo.dart';
+import 'package:sms_gateway/model/app_entity.dart';
+import 'package:sms_gateway/db/app_repo.dart';
 import 'package:sms_gateway/sms_helper.dart';
 import 'package:uuid/uuid.dart';
 

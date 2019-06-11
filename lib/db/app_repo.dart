@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:sms_gateway/app_entity.dart';
-import 'package:sms_gateway/firestore_utils.dart';
+import 'package:sms_gateway/model/app_entity.dart';
+import 'package:sms_gateway/db/firestore_utils.dart';
 
 class AppRepo with FirestoreUtils {
   CollectionReference get _appsRef => root.collection('apps');

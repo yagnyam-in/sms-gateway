@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
 
-part 'app_entity.g.dart';
+part 'package:sms_gateway/model/app_entity.g.dart';
 
 @JsonSerializable()
 class AppEntity {
   static final RegExp ID_REGEX = RegExp(r"^[a-zA-Z][a-zA-Z0-9-]{0,34}[a-zA-Z0-9]$");
 
-  @JsonKey(nullable: true)
+  @JsonKey(nullable: false)
   final String uid;
-  @JsonKey(nullable: true)
+  @JsonKey(nullable: false)
   final String id;
   @JsonKey(nullable: false)
   final String name;
@@ -28,6 +28,7 @@ class AppEntity {
   }) {
     assert(uid != null && uid.isNotEmpty);
     assert(ID_REGEX.hasMatch(id));
+    assert(id != null);
   }
 
   Map<String, dynamic> toJson() => _$AppEntityToJson(this);

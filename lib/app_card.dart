@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sms_gateway/app_entity.dart';
+import 'package:sms_gateway/model/app_entity.dart';
 
 class AppCard extends StatelessWidget {
   final AppEntity app;

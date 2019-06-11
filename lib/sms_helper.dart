@@ -1,6 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:sms_gateway/sms_service.dart';
+import 'package:sms_gateway/service/sms_service.dart';
 
 mixin SmsHelper {
   final SmsService _smsService = SmsService();

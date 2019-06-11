@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sms_gateway/manage_apps_page.dart';
-import 'package:sms_gateway/notification_service.dart';
+import 'package:sms_gateway/service/notification_service.dart';
 import 'package:sms_gateway/sms_helper.dart';
 import 'package:sms_gateway/test_page.dart';
 
