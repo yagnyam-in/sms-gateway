@@ -7,7 +7,6 @@ import 'package:sms_gateway/db/app_repo.dart';
 import 'package:sms_gateway/db/request_repo.dart';
 import 'package:sms_gateway/edit_app.dart';
 import 'package:sms_gateway/model/app_entity.dart';
-import 'package:sms_gateway/model/request_entity.dart';
 import 'package:sms_gateway/service/notification_service.dart';
 import 'package:sms_gateway/service/sms_service.dart';
 import 'package:sms_gateway/sms_helper.dart';
@@ -23,6 +22,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> with SmsHelper {
+  static const sendFromHomePage = false;
   final FirebaseUser firebaseUser;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   Stream<List<AppEntity>> _appStream;
@@ -33,14 +33,12 @@ class _HomePageState extends State<HomePage> with SmsHelper {
   void initState() {
     super.initState();
     _appStream = AppRepo(firebaseUser).fetchApps();
-    RequestRepo(firebaseUser)
-        .subscribeForPendingRequests()
-        .listen(_onPendingRequests);
     NotificationService.instance(firebaseUser).start();
-  }
-
-  void _onPendingRequests(List<RequestEntity> requests) {
-    SmsService.processAllPendingRequests(firebaseUser, requests);
+    if (sendFromHomePage) {
+      RequestRepo(firebaseUser)
+          .subscribeForPendingRequests()
+          .listen((requests) => SmsService.processAllPendingRequests(firebaseUser, requests));
+    }
   }
 
   void showToast(String toast) {
@@ -98,8 +96,7 @@ class _HomePageState extends State<HomePage> with SmsHelper {
     );
   }
 
-  Widget _appsWidget(
-      BuildContext context, AsyncSnapshot<List<AppEntity>> snapshot) {
+  Widget _appsWidget(BuildContext context, AsyncSnapshot<List<AppEntity>> snapshot) {
     if (snapshot.hasError) {
       return Center(
         child: Text(snapshot.error.toString()),

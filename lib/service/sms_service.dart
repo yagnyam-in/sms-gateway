@@ -80,7 +80,7 @@ class SmsService {
     RequestEntity request,
   ) async {
     if (firebaseUser != null) {
-      // await RequestRepo(firebaseUser).markProcessed(request);
+      await RequestRepo(firebaseUser).markProcessed(request);
     }
   }
 }
