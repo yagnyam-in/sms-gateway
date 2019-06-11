@@ -3,7 +3,6 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:sms_gateway/service/sms_service.dart';
 
 mixin SmsHelper {
-  final SmsService _smsService = SmsService();
 
   void showToast(String toast);
 
@@ -21,7 +20,7 @@ mixin SmsHelper {
       }
     }
     try {
-      await _smsService.sendSMS(phone: phone, message: message);
+      await SmsService.sendSMS(phone: phone, message: message);
       showToast("SMS Sent");
     } on PlatformException catch (e) {
       print("Error sending SMS: $e");

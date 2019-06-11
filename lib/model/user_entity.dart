@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
 
-part 'package:sms_gateway/model/user_entity.g.dart';
+part 'user_entity.g.dart';
 
 @JsonSerializable()
 class UserEntity {
-
   @JsonKey(nullable: false)
   final String uid;
   @JsonKey(nullable: true)
@@ -17,6 +16,11 @@ class UserEntity {
     @required this.fcmToken,
   }) {
     assert(uid != null && uid.isNotEmpty);
+  }
+
+  @override
+  String toString() {
+    return toJson().toString();
   }
 
   Map<String, dynamic> toJson() => _$UserEntityToJson(this);

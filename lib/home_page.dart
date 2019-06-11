@@ -1,8 +1,15 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sms_gateway/manage_apps_page.dart';
+import 'package:sms_gateway/app_card.dart';
+import 'package:sms_gateway/db/app_repo.dart';
+import 'package:sms_gateway/db/request_repo.dart';
+import 'package:sms_gateway/edit_app.dart';
+import 'package:sms_gateway/model/app_entity.dart';
+import 'package:sms_gateway/model/request_entity.dart';
 import 'package:sms_gateway/service/notification_service.dart';
+import 'package:sms_gateway/service/sms_service.dart';
 import 'package:sms_gateway/sms_helper.dart';
 import 'package:sms_gateway/test_page.dart';
 
@@ -17,16 +24,23 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> with SmsHelper {
   final FirebaseUser firebaseUser;
-
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  int _counter = 0;
+  Stream<List<AppEntity>> _appStream;
 
   _HomePageState(this.firebaseUser);
 
   @override
   void initState() {
     super.initState();
-    NotificationService.instance().start();
+    _appStream = AppRepo(firebaseUser).fetchApps();
+    RequestRepo(firebaseUser)
+        .subscribeForPendingRequests()
+        .listen(_onPendingRequests);
+    NotificationService.instance(firebaseUser).start();
+  }
+
+  void _onPendingRequests(List<RequestEntity> requests) {
+    SmsService.processAllPendingRequests(firebaseUser, requests);
   }
 
   void showToast(String toast) {
@@ -44,31 +58,24 @@ class _HomePageState extends State<HomePage> with SmsHelper {
         title: Text("SMS Gateway"),
         actions: <Widget>[
           IconButton(
-            icon: Icon(Icons.apps),
+            icon: Icon(Icons.send),
             tooltip: "Apps",
-            onPressed: () => _manageApps(context),
+            onPressed: () => _showTestPage(context),
           ),
         ],
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'SMS Sent',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.display1,
-            ),
-          ],
+      body: Padding(
+        padding: EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 4.0),
+        child: StreamBuilder<List<AppEntity>>(
+          stream: _appStream,
+          builder: _appsWidget,
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _showTestPage(context),
-        tooltip: 'Send',
-        child: Icon(Icons.send),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+        onPressed: () => _newApp(context),
+        tooltip: 'New',
+        child: Icon(Icons.add),
+      ),
     );
   }
 
@@ -82,11 +89,58 @@ class _HomePageState extends State<HomePage> with SmsHelper {
     );
   }
 
-  void _manageApps(BuildContext context) {
+  void _newApp(BuildContext context) {
     Navigator.push(
       context,
-      new MaterialPageRoute(
-        builder: (context) => ManageAppsPage(firebaseUser),
+      new MaterialPageRoute<AppEntity>(
+        builder: (context) => EditApp(firebaseUser),
+      ),
+    );
+  }
+
+  Widget _appsWidget(
+      BuildContext context, AsyncSnapshot<List<AppEntity>> snapshot) {
+    if (snapshot.hasError) {
+      return Center(
+        child: Text(snapshot.error.toString()),
+      );
+    } else if (!snapshot.hasData || snapshot.data.isEmpty) {
+      return Center(
+        child: Text("No Apps"),
+      );
+    } else {
+      return ListView(
+        children: snapshot.data.map((e) => appCard(context, e)).toList(),
+      );
+    }
+  }
+
+  Widget appCard(BuildContext context, AppEntity app) {
+    return Slidable(
+      actionPane: SlidableDrawerActionPane(),
+      actionExtentRatio: 0.25,
+      child: GestureDetector(
+        child: AppCard(
+          app: app,
+        ),
+        onTap: () => _editApp(context, app),
+      ),
+      secondaryActions: <Widget>[
+        new IconSlideAction(
+          caption: "Delete",
+          color: Colors.red,
+          icon: Icons.archive,
+          onTap: () => null,
+        ),
+      ],
+    );
+  }
+
+  void _editApp(BuildContext context, AppEntity app) {
+    Navigator.push(
+      context,
+      new MaterialPageRoute<AppEntity>(
+        builder: (context) => EditApp(firebaseUser, app: app),
       ),
     );
   }

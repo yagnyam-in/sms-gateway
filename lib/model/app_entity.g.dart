@@ -12,7 +12,8 @@ AppEntity _$AppEntityFromJson(Map json) {
       id: json['id'] as String,
       name: json['name'] as String,
       description: json['description'] as String,
-      accessToken: json['accessToken'] as String);
+      accessToken: json['accessToken'] as String,
+      smsCount: json['smsCount'] as int);
 }
 
 Map<String, dynamic> _$AppEntityToJson(AppEntity instance) {
@@ -30,5 +31,6 @@ Map<String, dynamic> _$AppEntityToJson(AppEntity instance) {
   }
 
   writeNotNull('accessToken', instance.accessToken);
+  writeNotNull('smsCount', instance.smsCount);
   return val;
 }

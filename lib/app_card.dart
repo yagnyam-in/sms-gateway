@@ -30,17 +30,17 @@ class AppCard extends StatelessWidget {
     return ListTile(
       contentPadding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
       title: Text(
-        app.name,
+        app.name ?? app.id,
         overflow: TextOverflow.ellipsis,
       ),
       subtitle: Padding(
         padding: EdgeInsets.only(top: 8.0),
         child: Text(
-          app.description,
+          app.description ?? app.id ?? "",
         ),
       ),
       trailing: Text(
-        "0",
+        "${app.smsCount ?? 0}",
         style: themeData.textTheme.title,
       ),
     );
