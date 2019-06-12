@@ -44,6 +44,11 @@ class _HomePageState extends State<HomePage> with SmsHelper {
       RequestRepo(appState).subscribeForPendingRequests().listen((requests) =>
           SmsService.processAllPendingRequests(appState, requests));
     }
+    WidgetsBinding.instance.addPostFrameCallback(_acquireSmsPermissions);
+  }
+
+  void _acquireSmsPermissions(Duration timeStamp) {
+    acquireSmsPermissions();
   }
 
   void showToast(String toast) {

@@ -3,14 +3,11 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:sms_gateway/service/sms_service.dart';
 
 mixin SmsHelper {
-
   void showToast(String toast);
 
-  Future<void> sendSMS({
-    String phone,
-    String message,
-  }) async {
-    PermissionStatus permission = await PermissionHandler().checkPermissionStatus(PermissionGroup.sms);
+  Future<void> acquireSmsPermissions() async {
+    PermissionStatus permission =
+        await PermissionHandler().checkPermissionStatus(PermissionGroup.sms);
     if (permission != PermissionStatus.granted) {
       Map<PermissionGroup, PermissionStatus> permissions =
           await PermissionHandler().requestPermissions([PermissionGroup.sms]);
@@ -19,6 +16,13 @@ mixin SmsHelper {
         showToast("Permission not granted");
       }
     }
+  }
+
+  Future<void> sendSMS({
+    String phone,
+    String message,
+  }) async {
+    await acquireSmsPermissions();
     try {
       await SmsService.sendSMS(phone: phone, message: message);
       showToast("SMS Sent");
