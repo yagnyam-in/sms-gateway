@@ -1,43 +1,48 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sms_gateway/app_card.dart';
 import 'package:sms_gateway/db/app_repo.dart';
 import 'package:sms_gateway/db/request_repo.dart';
 import 'package:sms_gateway/edit_app.dart';
 import 'package:sms_gateway/model/app_entity.dart';
+import 'package:sms_gateway/model/app_state.dart';
+import 'package:sms_gateway/profile_page.dart';
 import 'package:sms_gateway/service/notification_service.dart';
 import 'package:sms_gateway/service/sms_service.dart';
 import 'package:sms_gateway/sms_helper.dart';
 import 'package:sms_gateway/test_page.dart';
 
-class HomePage extends StatefulWidget {
-  final FirebaseUser firebaseUser;
+typedef AuthChangeCallback = void Function(FirebaseUser firebaseUser);
 
-  HomePage(this.firebaseUser, {Key key}) : super(key: key);
+class HomePage extends StatefulWidget {
+  final AppState appState;
+  final AuthChangeCallback authChangeCallback;
+
+  HomePage(this.appState, {Key key, @required this.authChangeCallback})
+      : super(key: key);
 
   @override
-  _HomePageState createState() => _HomePageState(firebaseUser);
+  _HomePageState createState() => _HomePageState(appState, authChangeCallback);
 }
 
 class _HomePageState extends State<HomePage> with SmsHelper {
   static const sendFromHomePage = false;
-  final FirebaseUser firebaseUser;
+  final AppState appState;
+  final AuthChangeCallback authChangeCallback;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   Stream<List<AppEntity>> _appStream;
 
-  _HomePageState(this.firebaseUser);
+  _HomePageState(this.appState, this.authChangeCallback);
 
   @override
   void initState() {
     super.initState();
-    _appStream = AppRepo(firebaseUser).fetchApps();
-    NotificationService.instance(firebaseUser).start();
+    _appStream = AppRepo(appState).subscribeForApps();
+    NotificationService.instance(appState).start();
     if (sendFromHomePage) {
-      RequestRepo(firebaseUser)
-          .subscribeForPendingRequests()
-          .listen((requests) => SmsService.processAllPendingRequests(firebaseUser, requests));
+      RequestRepo(appState).subscribeForPendingRequests().listen((requests) =>
+          SmsService.processAllPendingRequests(appState, requests));
     }
   }
 
@@ -60,6 +65,11 @@ class _HomePageState extends State<HomePage> with SmsHelper {
             tooltip: "Apps",
             onPressed: () => _showTestPage(context),
           ),
+          IconButton(
+            icon: Icon(Icons.account_circle),
+            tooltip: "Profile",
+            onPressed: () => _showProfilePage(context),
+          ),
         ],
       ),
       body: Padding(
@@ -78,11 +88,24 @@ class _HomePageState extends State<HomePage> with SmsHelper {
   }
 
   void _showTestPage(BuildContext context) async {
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     Navigator.push(
       context,
-      new MaterialPageRoute(
-        builder: (context) => TestPage(sharedPreferences: sharedPreferences),
+      MaterialPageRoute(
+        builder: (context) => TestPage(
+              appState: appState,
+            ),
+      ),
+    );
+  }
+
+  void _showProfilePage(BuildContext context) async {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ProfilePage(
+              appState: appState,
+              authChangeCallback: authChangeCallback,
+            ),
       ),
     );
   }
@@ -90,13 +113,14 @@ class _HomePageState extends State<HomePage> with SmsHelper {
   void _newApp(BuildContext context) {
     Navigator.push(
       context,
-      new MaterialPageRoute<AppEntity>(
-        builder: (context) => EditApp(firebaseUser),
+      MaterialPageRoute<AppEntity>(
+        builder: (context) => EditApp(appState),
       ),
     );
   }
 
-  Widget _appsWidget(BuildContext context, AsyncSnapshot<List<AppEntity>> snapshot) {
+  Widget _appsWidget(
+      BuildContext context, AsyncSnapshot<List<AppEntity>> snapshot) {
     if (snapshot.hasError) {
       return Center(
         child: Text(snapshot.error.toString()),
@@ -127,7 +151,7 @@ class _HomePageState extends State<HomePage> with SmsHelper {
           caption: "Delete",
           color: Colors.red,
           icon: Icons.archive,
-          onTap: () => null,
+          onTap: () => _deleteApp(context, app),
         ),
       ],
     );
@@ -137,8 +161,14 @@ class _HomePageState extends State<HomePage> with SmsHelper {
     Navigator.push(
       context,
       new MaterialPageRoute<AppEntity>(
-        builder: (context) => EditApp(firebaseUser, app: app),
+        builder: (context) => EditApp(appState, app: app),
       ),
     );
   }
+
+  void _deleteApp(BuildContext context, AppEntity app) {
+    AppRepo(appState).delete(app.id);
+  }
+
+  void _checkPermissions() {}
 }

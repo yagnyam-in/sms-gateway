@@ -1,26 +1,24 @@
 import 'dart:async';
-import 'dart:async' as prefix0;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:sms_gateway/db/firestore_utils.dart';
+import 'package:sms_gateway/generic_helper.dart';
 import 'package:sms_gateway/model/app_entity.dart';
+import 'package:sms_gateway/model/app_state.dart';
 
-class AppRepo with FirestoreUtils {
+class AppRepo with FirestoreUtils, GenericHelper {
   CollectionReference get _appsRef => root.collection('apps');
 
   DocumentReference ref(String appId) {
     return _appsRef.document(appId);
   }
 
-  final FirebaseUser firebaseUser;
+  final AppState appState;
   final DocumentReference root;
 
-  AppRepo(this.firebaseUser) : root = FirestoreUtils.rootRef(firebaseUser) {
-    assert(firebaseUser != null);
-  }
+  AppRepo(this.appState) : root = FirestoreUtils.rootRef(appState);
 
-  Stream<List<AppEntity>> fetchApps() {
+  Stream<List<AppEntity>> subscribeForApps() {
     return _appsRef.snapshots().map(_querySnapshotToApps);
   }
 
@@ -47,7 +45,6 @@ class AppRepo with FirestoreUtils {
     }
   }
 
-
   Future<AppEntity> save(AppEntity app) async {
     String existingAppIdOwner = await appIdOwnerId(app.id);
     if (existingAppIdOwner == null) {
@@ -68,5 +65,20 @@ class AppRepo with FirestoreUtils {
     } else {
       return [];
     }
+  }
+
+  Future<void> deleteAllApps() async {
+    QuerySnapshot qs = await _appsRef.getDocuments();
+    qs.documents.forEach((d) async {
+      await delete(d.documentID);
+    });
+  }
+
+  Future<void> delete(String appId) async {
+    print("Removing /apps/$appId");
+    await ignoreErrors(
+        () => Firestore.instance.collection('apps').document(appId).delete());
+    print("Removing /${ref(appId).path}");
+    await ignoreErrors(() => ref(appId).delete());
   }
 }

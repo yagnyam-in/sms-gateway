@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:sms_gateway/db/firestore_utils.dart';
+import 'package:sms_gateway/model/app_state.dart';
 import 'package:sms_gateway/model/request_entity.dart';
 
 class RequestRepo with FirestoreUtils {
@@ -19,12 +19,11 @@ class RequestRepo with FirestoreUtils {
     return _completedRef.document(requestId);
   }
 
-  final FirebaseUser firebaseUser;
+  final AppState appState;
   final DocumentReference root;
 
-  RequestRepo(this.firebaseUser) : root = FirestoreUtils.rootRef(firebaseUser) {
-    assert(firebaseUser != null);
-  }
+  RequestRepo(this.appState)
+      : root = FirestoreUtils.rootRef(appState);
 
   Stream<List<RequestEntity>> subscribeForPendingRequests() {
     return _pendingRef.snapshots().map(_querySnapshotToRequests);
@@ -42,9 +41,7 @@ class RequestRepo with FirestoreUtils {
 
   List<RequestEntity> _querySnapshotToRequests(QuerySnapshot snapshot) {
     if (snapshot.documents != null) {
-      return snapshot.documents
-          .map(_documentSnapshotToRequest)
-          .toList();
+      return snapshot.documents.map(_documentSnapshotToRequest).toList();
     } else {
       return [];
     }

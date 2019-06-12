@@ -1,41 +1,50 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:sms_gateway/sms_helper.dart';
+import 'package:sms_gateway/generic_helper.dart';
+import 'package:sms_gateway/model/app_state.dart';
 
-typedef LoginCallback = void Function(FirebaseUser firebaseUser);
+typedef AuthChangeCallback = void Function(FirebaseUser firebaseUser);
 
 class LoginPage extends StatefulWidget {
-  final LoginCallback callback;
+  final AppState appState;
+  final AuthChangeCallback authChangeCallback;
 
-  const LoginPage({
+  const LoginPage(
+    this.appState, {
     Key key,
-    @required this.callback,
+    @required this.authChangeCallback,
   }) : super(key: key);
 
   @override
   _LoginPageState createState() {
     return _LoginPageState(
-      callback: callback,
+      appState,
+      authChangeCallback,
     );
   }
 }
 
-class _LoginPageState extends State<LoginPage> with SmsHelper {
+class _LoginPageState extends State<LoginPage> with GenericHelper {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final LoginCallback callback;
+  final AppState appState;
+  final AuthChangeCallback authChangeCallback;
 
-  final TextEditingController phoneController = TextEditingController();
-  final TextEditingController verificationCodeController = TextEditingController();
+  final TextEditingController phoneController;
+  final TextEditingController verificationCodeController =
+      TextEditingController();
   final FocusNode verificationCodeControllerFocusNode = FocusNode();
 
   AuthCredential _authCredential;
   String _verificationId;
   bool _verificationCodeRequested = false;
 
-  _LoginPageState({
-    @required this.callback,
-  });
+  _LoginPageState(
+    this.appState,
+    this.authChangeCallback,
+  ) : phoneController = TextEditingController(
+          text: appState.sharedPreferences.getString("phone") ?? "",
+        );
 
   @override
   Widget build(BuildContext context) {
@@ -81,7 +90,8 @@ class _LoginPageState extends State<LoginPage> with SmsHelper {
                 child: RaisedButton.icon(
                   onPressed: _submit,
                   icon: Icon(Icons.send),
-                  label: Text(_verificationCodeRequested ? "Request Code" : "Login"),
+                  label: Text(
+                      _verificationCodeRequested ? "Login" : "Request Code"),
                 ),
               ),
             ],
@@ -98,7 +108,6 @@ class _LoginPageState extends State<LoginPage> with SmsHelper {
     return null;
   }
 
-  @override
   void showToast(String toast) {
     _scaffoldKey.currentState.showSnackBar(SnackBar(
       content: Text(toast),
@@ -127,18 +136,19 @@ class _LoginPageState extends State<LoginPage> with SmsHelper {
     );
     FirebaseAuth.instance.signInWithCredential(credential).then((user) {
       if (user != null) {
-        callback(user);
+        authChangeCallback(user);
       }
     });
   }
 
   void _requestVerification() {
     String phone = phoneController.text;
+    appState.sharedPreferences.setString("phone", phone);
     Future.delayed(const Duration(seconds: 30), () {
       setState(() {
         _verificationCodeRequested = false;
       });
-    });
+    }).catchError((e) => null);
     FirebaseAuth.instance.verifyPhoneNumber(
       phoneNumber: phone,
       timeout: const Duration(seconds: 30),
@@ -153,7 +163,7 @@ class _LoginPageState extends State<LoginPage> with SmsHelper {
     _authCredential = credentials;
     FirebaseAuth.instance.signInWithCredential(_authCredential).then((user) {
       if (user != null) {
-        callback(user);
+        authChangeCallback(user);
       }
     });
   }

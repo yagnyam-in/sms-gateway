@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sms_gateway/model/app_state.dart';
 import 'package:sms_gateway/sms_helper.dart';
 
 class TestPage extends StatefulWidget {
-  final SharedPreferences sharedPreferences;
+  final AppState appState;
 
-  const TestPage({Key key, this.sharedPreferences}) : super(key: key);
+  TestPage({Key key, this.appState}) : super(key: key) {
+    assert(appState != null);
+  }
 
   @override
   _TestPageState createState() {
-    return _TestPageState(sharedPreferences);
+    return _TestPageState(appState);
   }
 }
 
@@ -19,14 +21,16 @@ class _TestPageState extends State<TestPage> with SmsHelper {
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final SharedPreferences sharedPreferences;
+  final AppState appState;
 
   final TextEditingController phoneController;
   final TextEditingController messageController;
 
-  _TestPageState(this.sharedPreferences)
-      : phoneController = TextEditingController(text: sharedPreferences.getString(TEST_PHONE_KEY)),
-        messageController = TextEditingController(text: sharedPreferences.getString(TEST_MESSAGE_KEY));
+  _TestPageState(this.appState)
+      : phoneController = TextEditingController(
+            text: appState.sharedPreferences.getString(TEST_PHONE_KEY)),
+        messageController = TextEditingController(
+            text: appState.sharedPreferences.getString(TEST_MESSAGE_KEY));
 
   @override
   void initState() {
@@ -105,8 +109,8 @@ class _TestPageState extends State<TestPage> with SmsHelper {
     }
     String phone = phoneController.text;
     String message = messageController.text;
-    sharedPreferences.setString(TEST_PHONE_KEY, phone);
-    sharedPreferences.setString(TEST_MESSAGE_KEY, message);
+    appState.sharedPreferences.setString(TEST_PHONE_KEY, phone);
+    appState.sharedPreferences.setString(TEST_MESSAGE_KEY, message);
     sendSMS(phone: phone, message: message);
   }
 }

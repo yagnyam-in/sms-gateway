@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:sms_gateway/model/app_state.dart';
 
 mixin FirestoreUtils {
-  static DocumentReference rootRef(FirebaseUser firebaseUser) {
-    assert(firebaseUser != null);
-    return Firestore.instance.collection('/users').document('${firebaseUser.uid}');
+  static DocumentReference rootRef(AppState appState) {
+    assert(appState?.userId != null);
+    return Firestore.instance
+        .collection('/users')
+        .document('${appState.userId}');
   }
 }

@@ -1,8 +1,8 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:sms_gateway/db/app_repo.dart';
 import 'package:sms_gateway/db/request_repo.dart';
 import 'package:sms_gateway/model/app_entity.dart';
+import 'package:sms_gateway/model/app_state.dart';
 import 'package:sms_gateway/model/request_entity.dart';
 
 class SmsService {
@@ -30,40 +30,40 @@ class SmsService {
   }
 
   static Future<void> processRequest(
-    FirebaseUser firebaseUser,
+    AppState appState,
     RequestEntity request,
   ) async {
     print("Sending SMS for $request");
     try {
       await sendSMS(phone: request.phone, message: request.message);
-      _updateAppStats(firebaseUser, request);
-      _markRequestProcessed(firebaseUser, request);
+      _updateAppStats(appState, request);
+      _markRequestProcessed(appState, request);
     } catch (e) {
       print("Failed to send SMS: $e");
     }
   }
 
   static Future<void> processAllPendingRequests(
-    FirebaseUser firebaseUser, [
+    AppState appState, [
     List<RequestEntity> pendingRequests,
   ]) async {
-    if (firebaseUser != null) {
-      pendingRequests = pendingRequests ??
-          await RequestRepo(firebaseUser).fetchPendingRequests();
-      pendingRequests.forEach((r) => processRequest(firebaseUser, r));
+    if (appState != null) {
+      pendingRequests =
+          pendingRequests ?? await RequestRepo(appState).fetchPendingRequests();
+      pendingRequests.forEach((r) => processRequest(appState, r));
     }
   }
 
   static Future<void> _updateAppStats(
-    FirebaseUser firebaseUser,
+    AppState appState,
     RequestEntity request,
   ) async {
-    if (firebaseUser != null) {
-      AppRepo appRepo = AppRepo(firebaseUser);
+    if (appState != null) {
+      AppRepo appRepo = AppRepo(appState);
       AppEntity app = await appRepo.fetchApp(request.appId);
       if (app == null) {
         app = AppEntity(
-          userId: firebaseUser.uid,
+          userId: appState.userId,
           id: request.appId,
           name: request.appId,
           description: 'Not yet registered',
@@ -76,11 +76,11 @@ class SmsService {
   }
 
   static Future<void> _markRequestProcessed(
-    FirebaseUser firebaseUser,
+    AppState appState,
     RequestEntity request,
   ) async {
-    if (firebaseUser != null) {
-      await RequestRepo(firebaseUser).markProcessed(request);
+    if (appState != null) {
+      await RequestRepo(appState).markProcessed(request);
     }
   }
 }

@@ -1,18 +1,20 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:sms_gateway/db/app_repo.dart';
 import 'package:sms_gateway/model/app_entity.dart';
 import 'package:sms_gateway/sms_helper.dart';
 
+import 'model/app_state.dart';
+
 class EditApp extends StatefulWidget {
-  final FirebaseUser firebaseUser;
+  final AppState appState;
   final AppEntity app;
 
-  const EditApp(this.firebaseUser, {Key key, this.app}) : super(key: key);
+  const EditApp(this.appState, {Key key, this.app}) : super(key: key);
 
   @override
   _EditAppState createState() {
-    return _EditAppState(firebaseUser, app);
+    return _EditAppState(appState, app);
   }
 }
 
@@ -20,7 +22,7 @@ class _EditAppState extends State<EditApp> with SmsHelper {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  final FirebaseUser firebaseUser;
+  final AppState appState;
   final AppEntity app;
 
   final TextEditingController idController;
@@ -28,7 +30,7 @@ class _EditAppState extends State<EditApp> with SmsHelper {
   final TextEditingController descriptionController;
   final TextEditingController accessTokenController;
 
-  _EditAppState(this.firebaseUser, this.app)
+  _EditAppState(this.appState, this.app)
       : idController = TextEditingController(text: app?.id),
         nameController = TextEditingController(text: app?.name),
         descriptionController = TextEditingController(text: app?.description),
@@ -141,13 +143,14 @@ class _EditAppState extends State<EditApp> with SmsHelper {
     }
     AppEntity effectiveApp = app;
     if (effectiveApp == null) {
-      bool duplicateAppId = await AppRepo(firebaseUser).isAppIdTaken(idController.text);
+      bool duplicateAppId =
+          await AppRepo(appState).isAppIdTaken(idController.text);
       if (duplicateAppId) {
         showToast("App Id already taken");
         return null;
       }
       effectiveApp = AppEntity(
-        userId: firebaseUser.uid,
+        userId: appState.userId,
         id: idController.text,
         name: nameController.text,
         description: descriptionController.text,
@@ -161,7 +164,7 @@ class _EditAppState extends State<EditApp> with SmsHelper {
       );
     }
     try {
-      effectiveApp = await AppRepo(firebaseUser).save(effectiveApp);
+      effectiveApp = await AppRepo(appState).save(effectiveApp);
       Navigator.of(context).pop(effectiveApp);
     } catch (e) {
       print("Error Saving App: $e");

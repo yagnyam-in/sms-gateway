@@ -1,35 +1,26 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:sms_gateway/db/user_repo.dart';
+import 'package:sms_gateway/model/app_state.dart';
 import 'package:sms_gateway/model/user_entity.dart';
 import 'package:sms_gateway/service/sms_service.dart';
 
 class NotificationService {
   static NotificationService _instance;
 
-  static NotificationService instance(FirebaseUser firebaseUser) {
+  static NotificationService instance(AppState appState) {
     if (_instance == null) {
-      _instance = NotificationService._internal(firebaseUser);
+      _instance = NotificationService._internal(appState);
     } else {
-      _instance._firebaseUser = firebaseUser;
+      _instance._appState = appState;
     }
     return _instance;
   }
 
-  NotificationService._internal(FirebaseUser firebaseUser)
-      : _firebaseUser = firebaseUser;
+  NotificationService._internal(AppState appState) : _appState = appState;
 
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
-  FirebaseUser _firebaseUser;
+  AppState _appState;
   bool _started = false;
-
-  Future<FirebaseUser> get firebaseUser {
-    if (_firebaseUser != null) {
-      return Future.value(_firebaseUser);
-    } else {
-      return FirebaseAuth.instance.currentUser();
-    }
-  }
 
   void start() {
     if (!_started) {
@@ -58,12 +49,12 @@ class NotificationService {
   void tokenRefresh(String newToken) async {
     if (newToken != null) {
       print("New FCM Token $newToken");
-      if (_firebaseUser != null) {
+      if (_appState?.firebaseUser != null) {
         UserEntity user = UserEntity(
-          uid: _firebaseUser.uid,
+          uid: _appState.firebaseUser.uid,
           fcmToken: newToken,
         );
-        UserRepo(_firebaseUser).save(user);
+        UserRepo(_appState).save(user);
       }
     }
   }
@@ -76,7 +67,7 @@ class NotificationService {
     print("onMessage $message");
     Map<dynamic, dynamic> data = message['data'];
     print('data: $data');
-    SmsService.processAllPendingRequests(_firebaseUser);
+    SmsService.processAllPendingRequests(_appState);
     return null;
   }
 
@@ -89,5 +80,4 @@ class NotificationService {
     print("onResume $message");
     return null;
   }
-
 }
