@@ -78,7 +78,7 @@ class AppRepo with FirestoreUtils, GenericHelper {
     print("Removing /apps/$appId");
     await ignoreErrors(
         () => Firestore.instance.collection('apps').document(appId).delete());
-    print("Removing /${ref(appId).path}");
+    print("Removing ${ref(appId).path}");
     await ignoreErrors(() => ref(appId).delete());
   }
 }

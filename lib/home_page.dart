@@ -12,6 +12,7 @@ import 'package:sms_gateway/service/notification_service.dart';
 import 'package:sms_gateway/service/sms_service.dart';
 import 'package:sms_gateway/sms_helper.dart';
 import 'package:sms_gateway/test_page.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 typedef AuthChangeCallback = void Function(FirebaseUser firebaseUser);
 
@@ -66,8 +67,13 @@ class _HomePageState extends State<HomePage> with SmsHelper {
         title: Text("SMS Gateway"),
         actions: <Widget>[
           IconButton(
-            icon: Icon(Icons.send),
-            tooltip: "Apps",
+            icon: Icon(Icons.info),
+            tooltip: "Help",
+            onPressed: () => _showHelpPage(context),
+          ),
+          IconButton(
+            icon: Icon(Icons.build),
+            tooltip: "Test",
             onPressed: () => _showTestPage(context),
           ),
           IconButton(
@@ -112,6 +118,14 @@ class _HomePageState extends State<HomePage> with SmsHelper {
               authChangeCallback: authChangeCallback,
             ),
       ),
+    );
+  }
+
+  void _showHelpPage(BuildContext context) async {
+    launch(
+      "https://www.sg.yagnyam.in/faq",
+      forceSafariVC: false,
+      forceWebView: false,
     );
   }
 
