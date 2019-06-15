@@ -4,6 +4,7 @@ Use your phone as SMS Gateway
 
 
 [![Download Android](https://img.shields.io/badge/download-android-blue.svg)](https://dl.sg.yagnyam.in/app)
+[![Web Site](https://img.shields.io/badge/web-site-blue.svg)](https://www.sg.yagnyam.in)
 
 
 ## Instructions to Send SMS
