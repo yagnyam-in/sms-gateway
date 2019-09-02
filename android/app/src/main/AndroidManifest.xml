@@ -2,6 +2,7 @@
     package="in.yagnyam.sms_gateway">
 
     <uses-permission android:name="android.permission.SEND_SMS"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
 
     <application
         android:name="io.flutter.app.FlutterApplication"
@@ -31,5 +32,6 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        <service android:name=".KeepAliveService"/>
     </application>
 </manifest>
