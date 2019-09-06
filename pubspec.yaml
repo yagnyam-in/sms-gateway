@@ -1,7 +1,7 @@
 name: sms_gateway
 description: SMS gateway using personal Mobile
 
-version: 1.0.4+5
+version: 1.1.0+6
 
 environment:
   sdk: ">=2.2.2 <3.0.0"

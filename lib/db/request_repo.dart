@@ -8,8 +8,7 @@ import 'package:sms_gateway/model/request_entity.dart';
 class RequestRepo with FirestoreUtils {
   CollectionReference get _pendingRef => root.collection('pending-requests');
 
-  CollectionReference get _completedRef =>
-      root.collection('completed-requests');
+  CollectionReference get _completedRef => root.collection('completed-requests');
 
   DocumentReference pendingRef(String requestId) {
     return _pendingRef.document(requestId);
@@ -22,8 +21,12 @@ class RequestRepo with FirestoreUtils {
   final AppState appState;
   final DocumentReference root;
 
-  RequestRepo(this.appState)
-      : root = FirestoreUtils.rootRef(appState);
+  RequestRepo(this.appState) : root = FirestoreUtils.rootRef(appState);
+
+  // Pending requests are processed immediately. So better to subscribe only to completed requests
+  Stream<List<RequestEntity>> subscribeForApp(String appId) {
+    return _completedRef.where("appId", isEqualTo: appId).snapshots().map(_querySnapshotToRequests);
+  }
 
   Stream<List<RequestEntity>> subscribeForPendingRequests() {
     return _pendingRef.snapshots().map(_querySnapshotToRequests);
@@ -35,16 +38,22 @@ class RequestRepo with FirestoreUtils {
   }
 
   Future<void> markProcessed(RequestEntity request) async {
-    await pendingRef(request.uid).delete();
-    await completedRef(request.uid).setData(request.toJson());
+    await Future.wait([
+      pendingRef(request.uid).delete(),
+      completedRef(request.uid).setData(request.toJson()),
+    ]);
   }
 
   List<RequestEntity> _querySnapshotToRequests(QuerySnapshot snapshot) {
     if (snapshot.documents != null) {
-      return snapshot.documents.map(_documentSnapshotToRequest).toList();
+      return snapshot.documents.map(_documentSnapshotToRequest).where((r) => r != null).toList();
     } else {
       return [];
     }
+  }
+
+  Future<void> deleteRequest(RequestEntity request) {
+    return completedRef(request.uid).delete();
   }
 
   RequestEntity _documentSnapshotToRequest(DocumentSnapshot snapshot) {

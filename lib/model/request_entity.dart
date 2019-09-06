@@ -14,12 +14,15 @@ class RequestEntity {
   final String phone;
   @JsonKey(nullable: false)
   final String message;
+  @JsonKey(nullable: true)
+  final bool success;
 
   RequestEntity({
     @required this.uid,
     @required this.appId,
     @required this.phone,
     @required this.message,
+    this.success = true,
   }) {
     assert(uid != null);
     assert(appId != null);

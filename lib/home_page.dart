@@ -8,6 +8,7 @@ import 'package:sms_gateway/edit_app.dart';
 import 'package:sms_gateway/model/app_entity.dart';
 import 'package:sms_gateway/model/app_state.dart';
 import 'package:sms_gateway/profile_page.dart';
+import 'package:sms_gateway/requests_page.dart';
 import 'package:sms_gateway/service/notification_service.dart';
 import 'package:sms_gateway/service/sms_service.dart';
 import 'package:sms_gateway/sms_helper.dart';
@@ -20,8 +21,7 @@ class HomePage extends StatefulWidget {
   final AppState appState;
   final AuthChangeCallback authChangeCallback;
 
-  HomePage(this.appState, {Key key, @required this.authChangeCallback})
-      : super(key: key);
+  HomePage(this.appState, {Key key, @required this.authChangeCallback}) : super(key: key);
 
   @override
   _HomePageState createState() => _HomePageState(appState, authChangeCallback);
@@ -42,8 +42,9 @@ class _HomePageState extends State<HomePage> with SmsHelper {
     _appStream = AppRepo(appState).subscribeForApps();
     NotificationService.instance(appState).start();
     if (sendFromHomePage) {
-      RequestRepo(appState).subscribeForPendingRequests().listen((requests) =>
-          SmsService.processAllPendingRequests(appState, requests));
+      RequestRepo(appState)
+          .subscribeForPendingRequests()
+          .listen((requests) => SmsService.processAllPendingRequests(appState, requests));
     }
     WidgetsBinding.instance.addPostFrameCallback(_acquireSmsPermissions);
   }
@@ -103,8 +104,8 @@ class _HomePageState extends State<HomePage> with SmsHelper {
       context,
       MaterialPageRoute(
         builder: (context) => TestPage(
-              appState: appState,
-            ),
+          appState: appState,
+        ),
       ),
     );
   }
@@ -114,9 +115,9 @@ class _HomePageState extends State<HomePage> with SmsHelper {
       context,
       MaterialPageRoute(
         builder: (context) => ProfilePage(
-              appState: appState,
-              authChangeCallback: authChangeCallback,
-            ),
+          appState: appState,
+          authChangeCallback: authChangeCallback,
+        ),
       ),
     );
   }
@@ -138,8 +139,7 @@ class _HomePageState extends State<HomePage> with SmsHelper {
     );
   }
 
-  Widget _appsWidget(
-      BuildContext context, AsyncSnapshot<List<AppEntity>> snapshot) {
+  Widget _appsWidget(BuildContext context, AsyncSnapshot<List<AppEntity>> snapshot) {
     if (snapshot.hasError) {
       return Center(
         child: Text(snapshot.error.toString()),
@@ -163,8 +163,16 @@ class _HomePageState extends State<HomePage> with SmsHelper {
         child: AppCard(
           app: app,
         ),
-        onTap: () => _editApp(context, app),
+        onTap: () => _launchRequests(context, app),
       ),
+      actions: <Widget>[
+        new IconSlideAction(
+          caption: "Edit",
+          color: Colors.orange,
+          icon: Icons.edit,
+          onTap: () => _editApp(context, app),
+        ),
+      ],
       secondaryActions: <Widget>[
         new IconSlideAction(
           caption: "Delete",
@@ -189,5 +197,12 @@ class _HomePageState extends State<HomePage> with SmsHelper {
     AppRepo(appState).delete(app.id);
   }
 
-  void _checkPermissions() {}
+  void _launchRequests(BuildContext context, AppEntity app) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => RequestsPage(appState, app),
+      ),
+    );
+  }
 }
