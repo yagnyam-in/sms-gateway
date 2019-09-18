@@ -8,12 +8,13 @@ part of 'app_entity.dart';
 
 AppEntity _$AppEntityFromJson(Map json) {
   return AppEntity(
-      userId: json['userId'] as String,
-      id: json['id'] as String,
-      name: json['name'] as String,
-      description: json['description'] as String,
-      accessToken: json['accessToken'] as String,
-      smsCount: json['smsCount'] as int);
+    userId: json['userId'] as String,
+    id: json['id'] as String,
+    name: json['name'] as String,
+    description: json['description'] as String,
+    accessToken: json['accessToken'] as String,
+    smsCount: json['smsCount'] as int,
+  );
 }
 
 Map<String, dynamic> _$AppEntityToJson(AppEntity instance) {

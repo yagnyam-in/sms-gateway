@@ -8,7 +8,9 @@ part of 'user_entity.dart';
 
 UserEntity _$UserEntityFromJson(Map json) {
   return UserEntity(
-      uid: json['uid'] as String, fcmToken: json['fcmToken'] as String);
+    uid: json['uid'] as String,
+    fcmToken: json['fcmToken'] as String,
+  );
 }
 
 Map<String, dynamic> _$UserEntityToJson(UserEntity instance) {

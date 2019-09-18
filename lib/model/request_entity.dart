@@ -15,6 +15,8 @@ class RequestEntity {
   @JsonKey(nullable: false)
   final String message;
   @JsonKey(nullable: true)
+  final DateTime creationTime;
+  @JsonKey(nullable: true)
   final bool success;
 
   RequestEntity({
@@ -22,6 +24,7 @@ class RequestEntity {
     @required this.appId,
     @required this.phone,
     @required this.message,
+    @required this.creationTime,
     this.success = true,
   }) {
     assert(uid != null);

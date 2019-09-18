@@ -25,7 +25,11 @@ class RequestRepo with FirestoreUtils {
 
   // Pending requests are processed immediately. So better to subscribe only to completed requests
   Stream<List<RequestEntity>> subscribeForApp(String appId) {
-    return _completedRef.where("appId", isEqualTo: appId).snapshots().map(_querySnapshotToRequests);
+    return _completedRef
+        .where('appId', isEqualTo: appId)
+        .orderBy('creationTime', descending: true)
+        .snapshots()
+        .map(_querySnapshotToRequests);
   }
 
   Stream<List<RequestEntity>> subscribeForPendingRequests() {

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:sms_gateway/app_card.dart';
 import 'package:sms_gateway/db/app_repo.dart';
-import 'package:sms_gateway/db/request_repo.dart';
 import 'package:sms_gateway/edit_app.dart';
 import 'package:sms_gateway/model/app_entity.dart';
 import 'package:sms_gateway/model/app_state.dart';
@@ -28,7 +27,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> with SmsHelper {
-  static const sendFromHomePage = false;
   final AppState appState;
   final AuthChangeCallback authChangeCallback;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -41,16 +39,16 @@ class _HomePageState extends State<HomePage> with SmsHelper {
     super.initState();
     _appStream = AppRepo(appState).subscribeForApps();
     NotificationService.instance(appState).start();
-    if (sendFromHomePage) {
-      RequestRepo(appState)
-          .subscribeForPendingRequests()
-          .listen((requests) => SmsService.processAllPendingRequests(appState, requests));
-    }
     WidgetsBinding.instance.addPostFrameCallback(_acquireSmsPermissions);
+    WidgetsBinding.instance.addPostFrameCallback(_processAllPendingRequests);
   }
 
-  void _acquireSmsPermissions(Duration timeStamp) {
+  void _acquireSmsPermissions(Duration duration) {
     acquireSmsPermissions();
+  }
+
+  void _processAllPendingRequests(Duration duration) {
+    SmsService.processAllPendingRequests(appState);
   }
 
   void showToast(String toast) {
